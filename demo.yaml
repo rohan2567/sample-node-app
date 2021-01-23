@@ -1,13 +1,20 @@
-apiVersion : v1
-kind : Pod
-metadata : 
-  name : demo-pod
+apiVersion : apps/v1
+kind : Deployment
+metadata :
+  name : deployment-demo
   labels :
-    app : basic-app
-    env : testing
-spec :
-  containers :
-    - name : nginx
-      image : nginx
-
-      
+    tier : front-end
+spec : 
+  template :
+    metadata :
+      name : pod-name
+      labels :
+        tier : front-end
+    spec :
+      containers :
+        - name : nginx-container
+          image : nginx
+  replicas : 4
+  selector :
+    matchLabels :
+      tier : front-end
