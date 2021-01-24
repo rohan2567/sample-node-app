@@ -1,20 +1,33 @@
-apiVersion : apps/v1
-kind : Deployment
-metadata :
-  name : deployment-demo
-  labels :
-    tier : front-end
-spec : 
-  template :
-    metadata :
-      name : pod-name
-      labels :
-        tier : front-end
-    spec :
-      containers :
-        - name : nginx-container
-          image : nginx
-  replicas : 4
-  selector :
-    matchLabels :
-      tier : front-end
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-app-deploment
+  labels:
+    app: demo-node-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-node-app
+  template:
+    metadata:
+      labels:
+        app: demo-node-app
+    spec:
+      containers:
+      - name: node-app-demo-container
+        image: rohan2567/node-app-demo
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-node-app
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: demo-node-app
