@@ -3,11 +3,12 @@ pipeline {
 
     environment {
         registry = "rohan2567/node-app-demo"
-        registryCredential = 'docker'
+        registryCredential = 'dockerhub'
         dockerImage = ''
     }
    
     stages {
+        
         stage('Checkout github') {
             steps {
                git branch:'master', credentialsId: 'github', url: 'https://github.com/rohan2567/sample-node-app.git'
@@ -17,29 +18,35 @@ pipeline {
         stage('Build docker image') {
             steps {
                 script {
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                    dockerImage = docker.build registry + ":$BUILD_ID"
                 }
             }
         }
        
-        stage('push image to dockerhub') {
+        stage('Push docker image to Dockerhub') {
             steps {
                 script {
                     docker.withRegistry( '', registryCredential ) {
-                        dockerImage.push()
+                        dockerImage.push("latest")
+						dockerImage.push("$BUILD_ID")
                     }
                 }
             }
         }
-       
-          stage('Cleaning up') {
-            steps {
-                sh "docker rmi $registry:$BUILD_NUMBER"
-            }
-        }
-
         
-       
-    
-    }
+        stage('Deploy to k8s Cluster') {
+            steps {
+                kubernetesDeploy(
+                    configs: 'demo.yaml',
+                    kubeconfigId: 'kubeconfig'
+                    )
+                }
+            }
+		
+		stage('Cleaning up') {
+            steps {
+                sh "docker rmi $registry:$BUILD_ID"
+            }
+        }   
+}
 }
